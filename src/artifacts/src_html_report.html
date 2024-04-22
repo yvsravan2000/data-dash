@@ -1,0 +1,230 @@
+<style>
+body {
+  font-family: Verdana, sans-serif;
+  color: black;
+  background-color: #eee;
+}
+
+.buttons {
+  display: flex;
+  background-color: #eee;
+}
+
+.button {
+  border-radius: 10px;
+  padding: 5px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-right: 10px;
+  background-color: #007bff;
+  color: #fff;
+}
+
+.button:hover {
+  border-radius: 10px;
+  padding: 5px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-right: 10px;
+  background-color: #444;
+  color: #fff;
+}
+
+.active {
+  border-radius: 10px;
+  padding: 5px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-right: 10px;
+  background-color: #000;
+  color: #007bff;
+  font-weight:bolder;
+}
+
+table.dataframe {
+  border-collapse: separate;
+  border: 2px solid #ddd;
+  font-size: 14px;
+}
+
+table.dataframe thead th {
+  text-align: left;
+  position: sticky;
+  background-color: #007bff;
+  color: #fff;
+  z-index: 1;
+  top: 0;
+}
+
+table.dataframe tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.dataTables_filter, .dataTables_length, .dataTables_info, .dataTables_paginate, .paginate_button {
+  background-color: #eee;
+  backdrop-filter: blur(10px);
+  font-size: 14px;
+  margin-bottom:10px;
+  margin-top:10px;
+}
+
+.dataTables_length, .dataTables_info {
+  margin-left: 0.1%;
+}
+
+.dataTables_length select {
+  border-radius: 50px;
+  background-color: #0563af;
+  color: white;
+  padding: 3px;
+  width: 60px;
+  border: none;
+  font-size: 14px;
+  dataTables_length-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+  -webkit-appearance: button;
+  appearance: button;
+  outline: none;
+}
+
+.dataTables_length::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20%;
+  height: 100%;
+  text-align: center;
+  font-size: 28px;
+  line-height: 45px;
+  color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+.dataTables_length:hover::before {
+  color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dataTables_length select option {
+  padding: 10px;
+}
+
+input[type="search"] {
+  background-color: #0563af;
+  border: 1px solid #ccc;
+  color: #fff;
+  font-size: 14px;
+  padding: 3px;
+  border-radius: 50px;
+}
+
+::-webkit-scrollbar{
+    width: 7px;
+    height: 7px;
+    background-color: #f8f9fa;
+}
+::-webkit-scrollbar-thumb{
+    background-color: #007bff;
+    box-shadow:0px 0px 6px 2px rgba(0, 0, 0, 0.5) inset;
+}
+
+.status-component-success {
+    background-color: green;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.status-component-failed {
+    background-color: red;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+</style>
+
+<hr>
+<h1>🔍 Validata Comparision Report</h1>
+
+<div id="button-header" class="buttons">
+  <button class="button active" onclick="showTable('summary')">Summary</button>
+  <button class="button" onclick="showTable('differences')">Differences</button>
+  <button class="button" onclick="showTable('source_only')">In Source Only</button>
+  <button class="button" onclick="showTable('target_only')">In Target Only</button>
+</div>
+<hr>
+
+<div id="summary" style="display:none">
+  <h2><u>Comparision Results</u></h2>
+  <h4>Report Generation Timestamp: #current_date_and_time#</h4>
+  <h4>Source File: <i>#source_file_name#</i></h4>
+  <h4>Target File: <i>#target_file_name#</i></h4>
+  <h4>Time Taken to Compare: <i>#total_time_taken_in_mins# minutes</i></h4>
+  <div class="#status_class#">
+    <span class="status-text">#status#</span>
+  </div>
+  <br><br>
+  <h2><u>Overview</u></h2>
+  <ul>
+    <li><b>#total_source_records#</b> source row(s) processed</li>
+    <li><b>#total_target_records#</b> target row(s) processed</li>
+    <li><b>#total_errors#</b> errors found</li>
+    <ul>
+      <li><b>#total_differences#</b> row(s) with differences in data</li>
+      <li><b>#total_records_only_in_source#</b> row(s) only present in source</li>
+      <li><b>#total_records_only_in_target#</b> row(s) only present in target</li>
+    </ul>
+  </ul>
+</div>
+<div id="differences" style="display:none">
+<p><u>Note</u>: <i>The following details contains the records of both matched and un-matched values. But, the mismatched values are highlighted in <b><mark style="background-color: red; color: white;">"red"</mark></b> colour.</i></p>
+#differences_df#
+</div>
+<div id="source_only" style="display:none">#source_only_records_df#</div>
+<div id="target_only" style="display:none">#target_only_records_df#</div>
+
+<script>
+// Add active class to the current button (highlight it)
+var header = document.getElementById("button-header");
+var btns = header.getElementsByClassName("button");
+for (var i = 0; i < btns.length; i++) {
+  btns[i].addEventListener("click", function() {
+  var current = document.getElementsByClassName("active");
+  if (current.length > 0) { 
+    current[0].className = current[0].className.replace(" active", "");
+  }
+  this.className += " active";
+  });
+}
+</script>
+
+<script>
+function showTable(id) {
+  var tables = ['summary', 'differences', 'source_only', 'target_only'];
+  for (var i = 0; i < tables.length; i++) {
+    if (tables[i] == id) {
+      document.getElementById(tables[i]).style.display = 'block';
+    } else {
+      document.getElementById(tables[i]).style.display = 'none';
+    }
+  }
+}
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+
+<script>
+$(document).ready(function() {
+    $('table').DataTable();
+} );
+</script>
+
+<script>
+window.onload = function() {
+  showTable('summary');
+}
+</script>
